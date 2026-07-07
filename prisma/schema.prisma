@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ChatSession {
+  id        String        @id @default(cuid())
+  userId    String
+  title     String        @default("New Chat")
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      String      // "user" | "assistant"
+  content   String
+  type      String      @default("text") // "text" | "image"
+  imageUrl  String?     // B2 URL or base64 for generated images
+  b2Key     String?
+  sha256    String?
+  createdAt DateTime    @default(now())
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  userId    String
+  prompt    String
+  type      String
+  model     String   @default("flux")
+  fileName  String
+  fileSize  Int      @default(0)
+  mimeType  String
+  b2Url     String?
+  b2Key     String?
+  sha256    String?
+  status    String   @default("completed")
+  error     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
